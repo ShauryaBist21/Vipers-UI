@@ -1,7 +1,8 @@
 import streamlit as st
 import datetime
 import os
-import cv2
+
+# import cv2  # ❌ Commented for Streamlit Cloud compatibility
 
 st.set_page_config(page_title="VIPERS Surveillance", layout="wide")
 
@@ -17,10 +18,6 @@ st.markdown("<h1 style='color:#00FFCA'>🛡 VIPERS: Drone Video Surveillance Sys
 
 # Mode Toggle
 mode = st.radio("🎛 Select Mode:", ["Live", "Playback"], horizontal=True)
-
-# Cascades
-face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
-body_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_fullbody.xml")
 
 # Logging setup
 log_file = "logs/event_log.txt"
@@ -42,65 +39,27 @@ with col1:
     st.subheader(f"🎥 {mode} Mode")
 
     stframe = st.empty()
-    detected_today = False
 
     if mode == "Playback":
         video_path = "assets/drone_footage.mp4"
 
         if os.path.exists(video_path):
-            toggle = st.button("▶ Click to Start/Pause")
+            toggle = st.button("▶ Click to Play/Pause")
             if toggle:
                 st.session_state.is_playing = not st.session_state.is_playing
 
             if st.session_state.is_playing:
-                cap = cv2.VideoCapture(video_path)
-                while cap.isOpened() and st.session_state.is_playing:
-                    ret, frame = cap.read()
-                    if not ret:
-                        break
-
-                    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-                    bodies = body_cascade.detectMultiScale(gray, 1.1, 4)
-
-                    for (x, y, w, h) in bodies:
-                        cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 0, 255), 2)
-
-                    if len(bodies) > 0 and not detected_today:
-                        log_event("People detected in playback video.")
-                        detected_today = True
-
-                    stframe.image(frame, channels="BGR", use_container_width=True)
-                cap.release()
+                st.video(video_path)
             else:
-                st.warning("⏸️ Video paused. Click above to start.")
+                st.warning("⏸️ Video paused. Click above to resume.")
         else:
             st.error("⚠️ Video file not found.")
 
     elif mode == "Live":
-        cap = cv2.VideoCapture(0)  # Webcam
-        st.info("📡 Live camera activated (face detection). Press Stop to end.")
+        st.info("📡 Live mode is unavailable in deployed version (OpenCV not supported).")
 
-        stop = st.button("⛔ Stop Camera")
-        while cap.isOpened():
-            ret, frame = cap.read()
-            if not ret or stop:
-                break
-
-            gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-            faces = face_cascade.detectMultiScale(gray, 1.1, 4)
-
-            for (x, y, w, h) in faces:
-                cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 0, 0), 2)
-
-            if len(faces) > 0 and not detected_today:
-                log_event("Face detected in live webcam.")
-                detected_today = True
-
-            stframe.image(frame, channels="BGR", use_container_width=True)
-
-        cap.release()
-
-    st.markdown("🔴 <i>Note: Red = Person in video, Blue = Face in webcam.</i>", unsafe_allow_html=True)
+    st.markdown("🔴 <i>Note: Detection disabled for cloud version. Logs can be manually added.</i>",
+                unsafe_allow_html=True)
 
 with col2:
     st.subheader("📅 Calendar")
@@ -146,4 +105,3 @@ with st.expander("🚨 Live Alerts Panel"):
                 st.info("✅ No current threats.")
     else:
         st.info("✅ System monitoring...")
-

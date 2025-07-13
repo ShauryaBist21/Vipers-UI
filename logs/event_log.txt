@@ -2,3 +2,9 @@
 [2025-07-13 16:28:09] People detected in surveillance video.
 [2025-07-13 16:34:00] Face detected in live webcam.
 [2025-07-13 16:34:27] Face detected in live webcam.
+[2025-07-13 21:41:14] Face detected in live webcam.
+[2025-07-13 21:46:50] Face detected in live webcam.
+[2025-07-13 21:50:55] Face detected in live webcam.
+[2025-07-13 21:53:33] Face detected in live webcam.
+[2025-07-13 22:00:50] Face detected in live webcam.
+[2025-07-13 22:04:38] Face detected in live webcam.
